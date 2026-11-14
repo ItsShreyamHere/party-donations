@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Party donations, read from Form 24A</title>
+<meta property="og:title" content="Party donations, read from Form 24A">
+<meta property="og:description" content="22,822 verified donation rows read from the Form 24A reports parties file with the Election Commission of India, FY 2022-23 to 2025-26.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://party-donations.shreyam.me/">
+<meta name="description" content="22,822 verified donation rows read from the Form 24A reports parties file with the Election Commission of India, FY 2022-23 to 2025-26.">
+<style>
+@font-face { font-family: "Mona Sans"; src: url("fonts/MonaSans.woff2") format("woff2"); font-weight: 200 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Mona Sans"; src: url("fonts/MonaSans-Italic.woff2") format("woff2"); font-weight: 200 900; font-style: italic; font-display: swap; }
+body { max-width: 46em; margin: 2em auto; padding: 0 1em; font: 16px/1.55 "Mona Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #111; background: #fff; }
+h1 { font-size: 2em; margin-bottom: 0; }
+h2 { font-size: 1.3em; margin-top: 2em; }
+h3 { font-size: 1.05em; margin-bottom: 0.3em; }
+a { color: #0645ad; }
+table { border-collapse: collapse; margin: 1em 0; font-size: 0.9em; }
+th, td { padding: 3px 9px; text-align: left; vertical-align: top; }
+th { background: #eee; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; }
+code, pre { font-family: Menlo, Consolas, "Courier New", monospace; font-size: 0.9em; }
+pre { background: #f4f4f4; padding: 0.6em; overflow-x: auto; }
+.sub { color: #555; margin-top: 0.2em; }
+.scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<h1>Party donations, read from Form 24A</h1>
+<p class="sub">Donations above &#8377;20,000 reported by political parties to the Election Commission, 2022&ndash;2026</p>
+
+<p>
+Every political party in India has to tell the Election Commission about each donation above &#8377;20,000, on a form called 24A. The Commission puts these reports on its website. Most of them are scans of printed pages, often stamped and signed, sometimes slightly crooked, and you cannot search them or add them up.
+</p>
+<p>
+This release reads those scans and turns the donation rows into a table. The hard part was not reading them but knowing when the reading is right. A misread digit or a name that runs into the next line could put the wrong amount next to a real person's name, so every row had to earn its place.
+</p>
+<p>
+Only two kinds of rows are published. Either the rows of a page add up exactly to the total the party printed, or the same donation, with the same amount and a similar name, also appears in the transcription that <a href="https://myneta.info/">ADR / MyNeta</a> made by hand. Of 38,560 rows read, 22,822 passed. The other 15,738 are left out.
+</p>
+<p>
+Nothing personal beyond the name goes out. PAN numbers were used only to tell a person from a company and were never saved, and addresses were dropped.
+</p>
+
+<h2>Download</h2>
+<p>
+Plain CSV files, UTF-8, with a header row.<br>
+<a href="https://huggingface.co/datasets/shreyamm/party-donations-form24a">Hugging Face dataset &rarr;</a>
+</p>
+<div class="scroll"><table>
+<tr><th>File</th><th>Holds</th><th>Rows</th><th>Size</th><th>SHA-256</th></tr>
+<tr><td><a href="https://huggingface.co/datasets/shreyamm/party-donations-form24a/resolve/main/data/form24a_donations.csv">form24a_donations.csv</a></td><td>One row per verified donation: year, party, donor name as read, amount, mode, date, how it was verified, source PDF and page</td><td class="n">22,822</td><td class="n">4.5 MB</td><td><code>4737b190aadb899c4ed6aeea02b38c9c0d178a07b7118d1f4e7a16762c169974</code></td></tr>
+<tr><td><a href="https://huggingface.co/datasets/shreyamm/party-donations-form24a/resolve/main/data/form24a_documents.csv">form24a_documents.csv</a></td><td>One row per Form 24A report: rows read, their sum, the total the party printed, and whether they match</td><td class="n">151</td><td class="n">18 KB</td><td><code>52fa41bee8a90311328933ac390d6fd69e82ef963d9fb0044fb5f84d5c51a6a8</code></td></tr>
+<tr><td><a href="https://huggingface.co/datasets/shreyamm/party-donations-form24a/resolve/main/data/electoral_trust_documents.csv">electoral_trust_documents.csv</a></td><td>The same check for electoral trust reports</td><td class="n">53</td><td class="n">6 KB</td><td><code>b2d1e8f98fe7cce2394d55da4961bd18ce32262f4166b1de4fdaac2810982e39</code></td></tr>
+<tr><td><a href="https://huggingface.co/datasets/shreyamm/party-donations-form24a/resolve/main/data/party_expenditure_documents.csv">party_expenditure_documents.csv</a></td><td>The same check for party election expenditure statements</td><td class="n">281</td><td class="n">46 KB</td><td><code>4066f3d73b4649d3fa33a06a4b049a53c5f50edf4035f8d1aca47d00a261b2a6</code></td></tr>
+</table></div>
+<p>The full method, with every rule and every column, is in <a href="https://huggingface.co/datasets/shreyamm/party-donations-form24a/blob/main/METHODOLOGY.md">METHODOLOGY.md</a>. The original PDFs are in the <a href="https://source-documents.shreyam.me/">source documents</a> release.</p>
+
+<h3>Quick start</h3>
+<pre>import duckdb
+duckdb.sql("""
+  SELECT fy, party_from_filename, count(*) AS rows, sum(amount_rs) / 1e7 AS crore
+  FROM read_csv('hf://datasets/shreyamm/party-donations-form24a/data/form24a_donations.csv')
+  GROUP BY ALL ORDER BY crore DESC LIMIT 10
+""").show()</pre>
+
+<h2>What is in it</h2>
+<div class="scroll"><table>
+<tr><th></th><th>Count</th></tr>
+<tr><td>Verified donation rows</td><td class=n>22,822</td></tr>
+<tr><td>Their total</td><td class=n>&#8377;5,539.7 crore</td></tr>
+<tr><td>Form 24A reports they come from</td><td class=n>63</td></tr>
+<tr><td>Rows where the whole page adds up to the printed total</td><td class=n>746</td></tr>
+<tr><td>Rows that agree with the ADR / MyNeta transcription</td><td class=n>22,076</td></tr>
+<tr><td>Rows whose name text should be checked before quoting</td><td class=n>6,166</td></tr>
+</table></div>
+
+<h3>By year</h3>
+<div class="scroll"><table>
+<tr><th>Financial year</th><th>Rows</th><th>&#8377; crore</th></tr>
+<tr><td>2022-23</td><td class=n>8,975</td><td class=n>863.8</td></tr>
+<tr><td>2023-24</td><td class=n>7,827</td><td class=n>1,648.2</td></tr>
+<tr><td>2024-25</td><td class=n>5,918</td><td class=n>2,701.1</td></tr>
+<tr><td>2025-26</td><td class=n>102</td><td class=n>326.7</td></tr>
+</table></div>
+
+<h3>By party (verified rows only, so these are lower bounds)</h3>
+<div class="scroll"><table>
+<tr><th>Party</th><th>Rows</th><th>&#8377; crore</th></tr>
+<tr><td>Bharatiya Janata</td><td class=n>13,102</td><td class=n>4,192.0</td></tr>
+<tr><td>Dravida Munnetra Kazhagam</td><td class=n>530</td><td class=n>590.4</td></tr>
+<tr><td>Indian National Congress</td><td class=n>2,710</td><td class=n>234.7</td></tr>
+<tr><td>All India Trinamool Congress</td><td class=n>554</td><td class=n>189.9</td></tr>
+<tr><td>Telugu Desam</td><td class=n>267</td><td class=n>86.9</td></tr>
+<tr><td>All India Anna Dravida Munnetra Kazhagam</td><td class=n>51</td><td class=n>67.0</td></tr>
+<tr><td>Aam Aadmi</td><td class=n>3,803</td><td class=n>63.7</td></tr>
+<tr><td>Biju Janata Dal</td><td class=n>4</td><td class=n>60.0</td></tr>
+<tr><td>Yuvajana Sramika Rythu Congress</td><td class=n>4</td><td class=n>16.0</td></tr>
+<tr><td>Janasena</td><td class=n>71</td><td class=n>13.7</td></tr>
+<tr><td>Indian Union Muslim League</td><td class=n>1,177</td><td class=n>7.8</td></tr>
+<tr><td>Jannayak Janta</td><td class=n>130</td><td class=n>3.1</td></tr>
+</table></div>
+
+<h2>How it was read</h2>
+<ol>
+<li>Each page was turned into an image at 200 dpi and read with <a href="https://github.com/tesseract-ocr/tesseract">Tesseract</a>. Reports that were typed rather than scanned were read from their text directly.</li>
+<li>Words were grouped into rows by their position on the page. A row is kept when it has an amount of at least &#8377;1,000 in the amount column; the serial number, name, mode and date are read from the same line.</li>
+<li>Every total the party printed was collected, and the rows of each section were added up and compared with it.</li>
+<li>A report is only read once every one of its pages has been read. Half-read documents are skipped.</li>
+</ol>
+
+<h2>How it was checked</h2>
+<ul>
+<li><b>Totals.</b> Of 151 Form 24A reports, 31 add up exactly to the party's printed total. The check for every report is published, including the ones that do not add up.</li>
+<li><b>A second reading.</b> Rows from reports that do not add up are kept only if ADR / MyNeta's hand transcription has the same amount and a similar name for the same party and year. Each of their rows can confirm only one of ours.</li>
+<li><b>No PANs.</b> An automated check makes sure no PAN-shaped string is anywhere in the published file.</li>
+</ul>
+
+<h2>Limitations of this release</h2>
+<ul>
+<li><b>The donor name is what the OCR read.</b> It sometimes carries a town or a bit of the address, or is only a place name. <code>donor_text_needs_check</code> marks 6,166 such rows. Please look at the source page before you name anyone.</li>
+<li>The amount is the field that was checked. The name is not checked in the same way.</li>
+<li>Financial years 2022&ndash;23 to 2025&ndash;26 only, and only rows that passed, so party totals here are lower than the real ones.</li>
+<li>Electoral trust reports and expenditure statements could not be read reliably row by row. Only their document-level checks are published (53 and 281 documents).</li>
+<li>Party names are taken from the Election Commission's file names and are not cleaned up.</li>
+<li>Giving money to a party is legal and has to be disclosed. Nothing here suggests wrongdoing by any donor or party.</li>
+</ul>
+
+
+
+
+</body>
+</html>
